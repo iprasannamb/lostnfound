@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Navbar(){
   const navigate = useNavigate()
-  const { isAuthenticated, signOut } = useAuth()
+  const { isAuthenticated, role, signOut } = useAuth()
 
   const navClass = ({ isActive }) =>
     `nav-link ${isActive ? 'nav-link--active' : ''}`;
@@ -25,6 +25,9 @@ export default function Navbar(){
           <NavLink to="/lost" className={navClass}>Lost</NavLink>
           <NavLink to="/found" className={navClass}>Found</NavLink>
           <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>
+          {isAuthenticated && role === 'admin' ? (
+            <NavLink to="/admin/matches" className={navClass}>Admin Matches</NavLink>
+          ) : null}
           {!isAuthenticated ? (
             <>
               <NavLink to="/login" className={navClass}>Sign in</NavLink>

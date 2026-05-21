@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchFoundItems, fetchLostItems } from '../services/api'
+import { fetchFoundItems, fetchLostItems, fetchNotifications } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
 export default function Dashboard(){
   const { signOut } = useAuth()
   const [summary, setSummary] = useState({ lost: 0, found: 0 })
+  const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -24,6 +25,15 @@ export default function Dashboard(){
             lost: lostResponse?.pagination?.total || 0,
             found: foundResponse?.pagination?.total || 0
           })
+
+          try {
+            const notificationsResponse = await fetchNotifications({ page: 1, limit: 3 })
+            if (!cancelled) {
+              setNotifications(notificationsResponse?.data || [])
+            }
+          } catch (err) {
+            if (!cancelled) setNotifications([])
+          }
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -80,6 +90,22 @@ export default function Dashboard(){
           </p>
         </article>
       </div>
+
+      <article className="surface-card p-5">
+        <h2 className="section-card__title">Recent notifications</h2>
+        {!notifications.length ? (
+          <p className="section-card__copy mt-2">No notifications yet.</p>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {notifications.map((notification) => (
+              <div key={notification.id} className="detail-card">
+                <p className="text-sm">{notification.message}</p>
+                <p className="muted text-xs mt-1">{String(notification.created_at).replace('T', ' ').slice(0, 19)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </article>
     </section>
   )
 }

@@ -475,6 +475,39 @@ body {
 	font-size: 0.9em;
 }
 
+.badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.28rem 0.62rem;
+	border-radius: 999px;
+	font-size: 0.74rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	background: rgba(71, 85, 105, 0.12);
+	color: #334155;
+}
+
+.badge--pending {
+	background: rgba(217, 119, 6, 0.16);
+	color: #92400e;
+}
+
+.badge--contacted {
+	background: rgba(15, 118, 110, 0.16);
+	color: #115e59;
+}
+
+.badge--rejected {
+	background: rgba(220, 38, 38, 0.14);
+	color: #991b1b;
+}
+
+.badge--score {
+	background: rgba(30, 64, 175, 0.12);
+	color: #1e40af;
+}
+
 @media (max-width: 900px) {
 	.hero-panel,
 	.auth-layout {

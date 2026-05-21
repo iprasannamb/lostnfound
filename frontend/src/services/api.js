@@ -4,6 +4,14 @@ const API = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
 });
 
+export function toPublicAssetUrl(assetPath) {
+  if (!assetPath) return ''
+  if (/^https?:\/\//i.test(assetPath)) return assetPath
+  const apiBase = API.defaults.baseURL || ''
+  const root = apiBase.endsWith('/api') ? apiBase.slice(0, -4) : apiBase
+  return `${root}${assetPath.startsWith('/') ? '' : '/'}${assetPath}`
+}
+
 API.interceptors.request.use((config) => {
   if (typeof window === 'undefined') return config;
 
@@ -94,6 +102,51 @@ export async function createFoundItem(formData) {
     return data;
   } catch (err) {
     throw new Error(getApiError(err, 'Failed to submit found item'));
+  }
+}
+
+export async function fetchAdminMatches(params) {
+  try {
+    const { data } = await API.get('/admin/matches', { params })
+    return data
+  } catch (err) {
+    throw new Error(getApiError(err, 'Failed to fetch admin matches'))
+  }
+}
+
+export async function approveAdminMatch(id) {
+  try {
+    const { data } = await API.patch(`/admin/matches/${id}/approve`)
+    return data
+  } catch (err) {
+    throw new Error(getApiError(err, 'Failed to approve match'))
+  }
+}
+
+export async function rejectAdminMatch(id) {
+  try {
+    const { data } = await API.patch(`/admin/matches/${id}/reject`)
+    return data
+  } catch (err) {
+    throw new Error(getApiError(err, 'Failed to reject match'))
+  }
+}
+
+export async function rematchAdminCandidates() {
+  try {
+    const { data } = await API.post('/admin/matches/rematch')
+    return data
+  } catch (err) {
+    throw new Error(getApiError(err, 'Failed to run re-matching'))
+  }
+}
+
+export async function fetchNotifications(params) {
+  try {
+    const { data } = await API.get('/notifications', { params })
+    return data
+  } catch (err) {
+    throw new Error(getApiError(err, 'Failed to fetch notifications'))
   }
 }
 

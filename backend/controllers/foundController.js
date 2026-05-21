@@ -1,15 +1,18 @@
 const FoundItem = require('../models/foundModel');
-
-function parseOptionalInt(value) {
-  if (value === undefined || value === null || value === '') return null;
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
+const { evaluateAndCreateCandidatesForFound } = require('../services/matchingService');
+const { sanitizeText, sanitizeDate, parseOptionalInt } = require('../utils/validation');
 
 const createFound = async (req, res, next) => {
   try {
-    if (!req.body.title || !req.body.location_found || !req.body.contact_info) {
-      return res.status(400).json({ message: 'title, location_found and contact_info are required' });
+    const title = sanitizeText(req.body.title, 200);
+    const location_found = sanitizeText(req.body.location_found, 255);
+    const contact_info = sanitizeText(req.body.contact_info, 255);
+    const description = sanitizeText(req.body.description, 2000);
+    const color = sanitizeText(req.body.color, 80);
+    const date_found = sanitizeDate(req.body.date_found);
+
+    if (!title || !location_found) {
+      return res.status(400).json({ message: 'title and location_found are required' });
     }
 
     const categoryId = parseOptionalInt(req.body.category_id);
@@ -19,16 +22,22 @@ const createFound = async (req, res, next) => {
 
     const data = {
       user_id: req.user.id,
-      title: req.body.title,
-      description: req.body.description,
+      title,
+      description,
       category_id: categoryId,
-      date_found: req.body.date_found,
-      location_found: req.body.location_found,
-      contact_info: req.body.contact_info,
+      color,
+      date_found,
+      location_found,
+      contact_info,
       image_path: req.file ? `/uploads/${req.file.filename}` : null
     };
     const result = await FoundItem.create(data);
-    res.status(201).json({ message: 'Found item reported', id: result.id });
+    const matching = await evaluateAndCreateCandidatesForFound(result.id);
+    res.status(201).json({
+      message: 'Found item reported',
+      id: result.id,
+      potentialMatchesCreated: matching.created
+    });
   } catch (err) { next(err); }
 };
 
@@ -49,6 +58,13 @@ const getFoundById = async (req, res, next) => {
   try {
     const item = await FoundItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Found item not found' });
+
+    const isOwnerOrAdmin = req.user && (req.user.id === item.user_id || req.user.role === 'admin');
+    if (!isOwnerOrAdmin) {
+      delete item.contact_info;
+      delete item.user_email;
+    }
+
     res.json(item);
   } catch (err) {
     next(err);

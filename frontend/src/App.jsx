@@ -8,8 +8,10 @@ import LostItems from './pages/LostItems'
 import FoundItems from './pages/FoundItems'
 import ItemDetails from './pages/ItemDetails'
 import Dashboard from './pages/Dashboard'
+import AdminMatches from './pages/AdminMatches'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminRoute from './components/AdminRoute'
 
 export default function App(){
   return (
@@ -27,6 +29,7 @@ export default function App(){
             <Route path="/found" element={<FoundItems/>} />
             <Route path="/items/:type/:id" element={<ItemDetails/>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>} />
+            <Route path="/admin/matches" element={<AdminRoute><AdminMatches/></AdminRoute>} />
           </Routes>
         </main>
       </div>

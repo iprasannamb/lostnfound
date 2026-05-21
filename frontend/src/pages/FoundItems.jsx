@@ -17,6 +17,7 @@ export default function FoundItems(){
     title: '',
     description: '',
     category_id: '',
+    color: '',
     date_found: '',
     location_found: '',
     contact_info: '',
@@ -75,9 +76,10 @@ export default function FoundItems(){
       payload.append('title', form.title)
       payload.append('description', form.description)
       if (categoryId) payload.append('category_id', categoryId)
+      payload.append('color', form.color)
       payload.append('date_found', form.date_found)
       payload.append('location_found', form.location_found)
-      payload.append('contact_info', form.contact_info)
+      if (form.contact_info) payload.append('contact_info', form.contact_info)
       if (form.image) payload.append('image', form.image)
 
       await createFoundItem(payload)
@@ -87,6 +89,7 @@ export default function FoundItems(){
         title: '',
         description: '',
         category_id: '',
+        color: '',
         date_found: '',
         location_found: '',
         contact_info: '',
@@ -132,9 +135,10 @@ export default function FoundItems(){
         <form onSubmit={onSubmit} className="surface-card p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <input name="title" value={form.title} onChange={onChange} required className="notion-input" placeholder="Title" />
           <input name="category_id" value={form.category_id} onChange={onChange} className="notion-input" placeholder="Category ID (e.g., 1)" />
+          <input name="color" value={form.color} onChange={onChange} className="notion-input" placeholder="Color (optional)" />
           <input name="date_found" value={form.date_found} onChange={onChange} type="date" className="notion-input" />
           <input name="location_found" value={form.location_found} onChange={onChange} className="notion-input" placeholder="Location found" />
-          <input name="contact_info" value={form.contact_info} onChange={onChange} className="notion-input" placeholder="Contact info" />
+          <input name="contact_info" value={form.contact_info} onChange={onChange} className="notion-input" placeholder="Contact info (optional)" />
           <input name="image" onChange={onChange} type="file" accept="image/*" className="notion-input py-2" />
           <textarea name="description" value={form.description} onChange={onChange} className="notion-input md:col-span-2 min-h-[96px] py-2" placeholder="Description" />
 
@@ -162,6 +166,7 @@ export default function FoundItems(){
                   <th>Title</th>
                   <th>Category</th>
                   <th>Location</th>
+                  <th>Color</th>
                   <th>Status</th>
                   <th>Posted by</th>
                 </tr>
@@ -176,13 +181,14 @@ export default function FoundItems(){
                     </td>
                     <td>{item.category_name || '-'}</td>
                     <td>{item.location_found || '-'}</td>
+                    <td>{item.color || '-'}</td>
                     <td className="capitalize">{item.status}</td>
                     <td>{item.user_name}</td>
                   </tr>
                 ))}
                 {!items.length && (
                   <tr>
-                    <td colSpan="5" className="muted">No found items found.</td>
+                    <td colSpan="6" className="muted">No found items found.</td>
                   </tr>
                 )}
               </tbody>

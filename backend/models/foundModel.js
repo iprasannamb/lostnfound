@@ -2,11 +2,11 @@ const pool = require('../config/db');
 
 const FoundItem = {
   async create(data) {
-    const { user_id, title, description, category_id, date_found, location_found, contact_info, image_path } = data;
+    const { user_id, title, description, category_id, color, date_found, location_found, contact_info, image_path } = data;
     const [result] = await pool.query(
-      `INSERT INTO found_items (user_id, title, description, category_id, date_found, location_found, contact_info, image_path)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [user_id, title, description, category_id, date_found, location_found, contact_info, image_path]
+      `INSERT INTO found_items (user_id, title, description, category_id, color, date_found, location_found, contact_info, image_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [user_id, title, description, category_id, color, date_found, location_found, contact_info, image_path]
     );
     return { id: result.insertId };
   },
@@ -63,6 +63,19 @@ const FoundItem = {
         totalPages: Math.ceil(countRows[0].total / Number(limit)) || 1
       }
     };
+  },
+
+  async listOpenForMatching() {
+    const [rows] = await pool.query(
+      `SELECT id, user_id, title, description, category_id, color, date_found, location_found
+       FROM found_items
+       WHERE status IN ('unmatched', 'possible_match')`
+    );
+    return rows;
+  },
+
+  async updateStatus(id, status) {
+    await pool.query('UPDATE found_items SET status = ? WHERE id = ?', [status, id]);
   }
 };
 

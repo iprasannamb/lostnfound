@@ -1,7 +1,7 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { fetchItemDetails } from '../services/api'
+import { fetchItemDetails, toPublicAssetUrl } from '../services/api'
 
 export default function ItemDetails(){
   const { type, id } = useParams();
@@ -45,6 +45,13 @@ export default function ItemDetails(){
         <p className="text-red-600 text-sm">{error}</p>
       ) : item ? (
         <div className="surface-card p-5">
+          {item.image_path ? (
+            <img
+              src={toPublicAssetUrl(item.image_path)}
+              alt={item.title || 'Reported item'}
+              className="w-full max-h-[360px] object-cover rounded-xl mb-4 border border-slate-200"
+            />
+          ) : null}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="muted">Type</p>
@@ -61,6 +68,10 @@ export default function ItemDetails(){
             <div>
               <p className="muted">Category</p>
               <p>{item.category_name || '-'}</p>
+            </div>
+            <div>
+              <p className="muted">Color</p>
+              <p>{item.color || '-'}</p>
             </div>
             <div>
               <p className="muted">Location</p>

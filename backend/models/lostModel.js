@@ -2,11 +2,11 @@ const pool = require('../config/db');
 
 const LostItem = {
   async create(data) {
-    const { user_id, title, description, category_id, date_lost, location_lost, contact_info, image_path } = data;
+    const { user_id, title, description, category_id, color, date_lost, location_lost, contact_info, image_path } = data;
     const [result] = await pool.query(
-      `INSERT INTO lost_items (user_id, title, description, category_id, date_lost, location_lost, contact_info, image_path)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [user_id, title, description, category_id, date_lost, location_lost, contact_info, image_path]
+      `INSERT INTO lost_items (user_id, title, description, category_id, color, date_lost, location_lost, contact_info, image_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [user_id, title, description, category_id, color, date_lost, location_lost, contact_info, image_path]
     );
     return { id: result.insertId };
   },
@@ -63,6 +63,19 @@ const LostItem = {
         totalPages: Math.ceil(countRows[0].total / Number(limit)) || 1
       }
     };
+  },
+
+  async listOpenForMatching() {
+    const [rows] = await pool.query(
+      `SELECT id, user_id, title, description, category_id, color, date_lost, location_lost
+       FROM lost_items
+       WHERE status IN ('open', 'match_found')`
+    );
+    return rows;
+  },
+
+  async updateStatus(id, status) {
+    await pool.query('UPDATE lost_items SET status = ? WHERE id = ?', [status, id]);
   }
 };
 

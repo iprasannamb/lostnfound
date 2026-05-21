@@ -17,6 +17,7 @@ export default function LostItems(){
     title: '',
     description: '',
     category_id: '',
+    color: '',
     date_lost: '',
     location_lost: '',
     contact_info: '',
@@ -75,6 +76,7 @@ export default function LostItems(){
       payload.append('title', form.title)
       payload.append('description', form.description)
       if (categoryId) payload.append('category_id', categoryId)
+      payload.append('color', form.color)
       payload.append('date_lost', form.date_lost)
       payload.append('location_lost', form.location_lost)
       payload.append('contact_info', form.contact_info)
@@ -87,6 +89,7 @@ export default function LostItems(){
         title: '',
         description: '',
         category_id: '',
+        color: '',
         date_lost: '',
         location_lost: '',
         contact_info: '',
@@ -132,6 +135,7 @@ export default function LostItems(){
         <form onSubmit={onSubmit} className="surface-card p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <input name="title" value={form.title} onChange={onChange} required className="notion-input" placeholder="Title" />
           <input name="category_id" value={form.category_id} onChange={onChange} className="notion-input" placeholder="Category ID (e.g., 1)" />
+          <input name="color" value={form.color} onChange={onChange} className="notion-input" placeholder="Color (optional)" />
           <input name="date_lost" value={form.date_lost} onChange={onChange} type="date" className="notion-input" />
           <input name="location_lost" value={form.location_lost} onChange={onChange} className="notion-input" placeholder="Location lost" />
           <input name="contact_info" value={form.contact_info} onChange={onChange} className="notion-input" placeholder="Contact info" />
@@ -162,6 +166,7 @@ export default function LostItems(){
                   <th>Title</th>
                   <th>Category</th>
                   <th>Location</th>
+                  <th>Color</th>
                   <th>Status</th>
                   <th>Posted by</th>
                 </tr>
@@ -176,13 +181,14 @@ export default function LostItems(){
                     </td>
                     <td>{item.category_name || '-'}</td>
                     <td>{item.location_lost || '-'}</td>
+                    <td>{item.color || '-'}</td>
                     <td className="capitalize">{item.status}</td>
                     <td>{item.user_name}</td>
                   </tr>
                 ))}
                 {!items.length && (
                   <tr>
-                    <td colSpan="5" className="muted">No lost items found.</td>
+                    <td colSpan="6" className="muted">No lost items found.</td>
                   </tr>
                 )}
               </tbody>

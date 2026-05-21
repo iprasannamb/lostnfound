@@ -1,14 +1,17 @@
 const LostItem = require('../models/lostModel');
-
-function parseOptionalInt(value) {
-  if (value === undefined || value === null || value === '') return null;
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
+const { evaluateAndCreateCandidatesForLost } = require('../services/matchingService');
+const { sanitizeText, sanitizeDate, parseOptionalInt } = require('../utils/validation');
 
 const createLost = async (req, res, next) => {
   try {
-    if (!req.body.title || !req.body.location_lost || !req.body.contact_info) {
+    const title = sanitizeText(req.body.title, 200);
+    const location_lost = sanitizeText(req.body.location_lost, 255);
+    const contact_info = sanitizeText(req.body.contact_info, 255);
+    const description = sanitizeText(req.body.description, 2000);
+    const color = sanitizeText(req.body.color, 80);
+    const date_lost = sanitizeDate(req.body.date_lost);
+
+    if (!title || !location_lost || !contact_info) {
       return res.status(400).json({ message: 'title, location_lost and contact_info are required' });
     }
 
@@ -19,16 +22,22 @@ const createLost = async (req, res, next) => {
 
     const data = {
       user_id: req.user.id,
-      title: req.body.title,
-      description: req.body.description,
+      title,
+      description,
       category_id: categoryId,
-      date_lost: req.body.date_lost,
-      location_lost: req.body.location_lost,
-      contact_info: req.body.contact_info,
+      color,
+      date_lost,
+      location_lost,
+      contact_info,
       image_path: req.file ? `/uploads/${req.file.filename}` : null
     };
     const result = await LostItem.create(data);
-    res.status(201).json({ message: 'Lost item reported', id: result.id });
+    const matching = await evaluateAndCreateCandidatesForLost(result.id);
+    res.status(201).json({
+      message: 'Lost item reported',
+      id: result.id,
+      potentialMatchesCreated: matching.created
+    });
   } catch (err) {
     next(err);
   }
@@ -51,6 +60,13 @@ const getLostById = async (req, res, next) => {
   try {
     const item = await LostItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Lost item not found' });
+
+    const isOwnerOrAdmin = req.user && (req.user.id === item.user_id || req.user.role === 'admin');
+    if (!isOwnerOrAdmin) {
+      delete item.contact_info;
+      delete item.user_email;
+    }
+
     res.json(item);
   } catch (err) {
     next(err);
